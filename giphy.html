@@ -1,0 +1,116 @@
+<html>
+<head>
+	
+	<style type="text/css">
+		button, div, form, input {
+			margin: 10px;
+		}
+	</style>
+</head>
+<body>
+
+<div class="head">
+    <h1 class="text-center">Animal Search</h1>
+
+<div id="buttonsView"></div>
+
+<form id="animal-form">
+    <label for="animal-input">Add a topic</label>
+    <input type="text" id="animal-input"><br>
+    
+    <!-- Button triggers new movie to be added -->
+    <input id="addAnimal" type="submit" value="Add a Animal Bro">
+  </form>
+
+<div id="giphyView"></div>
+
+</body>
+<script src='http://code.jquery.com/jquery-2.1.3.min.js'></script>
+<script type="text/javascript">
+
+	var topics=["cat", "dog", "horse", "cow", "chicken"];
+
+	$(document).ready(function() {
+		renderButtons();
+	});
+
+
+	function renderButtons(){ 
+
+		$("#buttonsView").empty();
+
+		for (var i = 0; i < topics.length; i++){
+	 
+		    var buttonToGenerate = $("<button>") 
+		    buttonToGenerate.addClass("topic");  
+		    buttonToGenerate.attr("data-name", topics[i]);
+		    buttonToGenerate.text(topics[i]); 
+		    buttonToGenerate.click(displayGif);
+		    $("#buttonsView").append(buttonToGenerate); 
+		}
+	}
+
+	function toggleAnim() {
+		var isAnimated = ($(this).attr("is-active") === "true"),
+			animURL = $(this).attr("anim-image"),
+			stillURL = $(this).attr("still-image");
+
+		if (isAnimated) {
+			$(this).attr("src", stillURL);
+			$(this).attr("is-active", false);
+		} else {
+			$(this).attr("is-active", true);
+			$(this).attr("src", animURL);
+		}
+	}
+
+	function displayGif() {
+		var topic = $(this).attr("data-name");
+		var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + topic + "&api_key=dc6zaTOxFJmzC&limit=10";
+		
+		// Creates AJAX call for the specific movie being 
+		$.ajax({url: queryURL, method: "GET"}).done(function(response) 		{
+			$("#giphyView").empty();
+
+			console.log(response);
+
+			for (var i = 0; i < response.data.length; i++){
+		   		var image = $("<img>"),
+		   			caption = $("<p>"),
+		   			imageData = response.data[i];
+
+		    	image.addClass("giphy");  
+		    	image.attr("still-image", imageData.images.original_still.url);
+		    	image.attr("src", imageData.images.original_still.url);
+		    	image.attr("anim-image", imageData.images.original.url);
+		    	image.attr("is-active", false);
+
+		    	image.click(toggleAnim);
+		    	caption.text("Rating: " + imageData.rating);
+
+
+		    	$("#giphyView").append(image);
+		    	$("#giphyView").append(caption); 			}	
+
+			});
+	};
+
+		// This function handles events where one button is clicked
+	$("#addAnimal").on("click", function(){
+
+		// This line of code will grab the input from the textbox
+		var topic = $("#animal-input").val().trim();
+
+		// The movie from the textbox is then added to our array
+		topics.push(topic);
+		
+		// Our array then runs which handles the processing of our movie array
+		renderButtons();
+
+		// We have this line so that users can hit "enter" instead of clicking on ht button and it won't move to the next page
+		return false;
+	})
+
+
+
+		</script>
